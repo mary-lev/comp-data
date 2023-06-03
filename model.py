@@ -7,7 +7,7 @@ class Identifiable_entity:
     def getId(self):
         return self.id
 
-class image(Identifiable_entity):
+class Image(Identifiable_entity):
     pass 
 
 class Annotation(Identifiable_entity):
