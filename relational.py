@@ -11,6 +11,27 @@ all = [
 ]
 
 class AnnotationProcessor(Processor):
+import csv
+import sqlite3
+connection = sqlite3.connect("oga.db")
+cursor = connection.cursor()
+create_table = '''CREATE TABLE annotations(
+                id STRING PRIMARY KEY,
+                body STRING NOT NULL,
+                target STRING NOT NULL,
+                motivation STRING NOT NULL);
+                '''
+cursor.execute(create_table)
+with open("data/annotations.csv") as file:
+    contents = csv.reader(file)
+    insert_records = "INSERT INTO annotations (id, body, target, motivation) VALUES(?, ?, ?, ?)"
+    cursor.executemany(insert_records, contents)
+    select_all = "SELECT * FROM annotations"
+    rows = cursor.execute(select_all).fetchall()
+    for r in rows:
+        print(r)
+    connection.commit()
+    connection.close()
 
     def uploadData(): 
         """it takes in input the path of a CSV file containing annotations and uploads them in the database. 
@@ -19,6 +40,26 @@ class AnnotationProcessor(Processor):
 
 
 class MetadataProcessor(Processor):
+import csv
+import sqlite3
+connection = sqlite3.connect("makarkina.db")
+cursor = connection.cursor()
+create_table = '''CREATE TABLE metadata(
+                id STRING PRIMARY KEY,
+                title STRING NOT NULL,
+                creator STRING NOT NULL);
+                '''
+cursor.execute(create_table)
+with open("data/metadata.csv") as file:
+    contents = csv.reader(file)
+    insert_records = "INSERT INTO metadata (id, title, creator) VALUES(?, ?, ?)"
+    cursor.executemany(insert_records, contents)
+    select_all = "SELECT * FROM metadata"
+    rows = cursor.execute(select_all).fetchall()
+    for r in rows:
+        print(r)
+    connection.commit()
+    connection.close()
 
     def uploadData():
         """it takes in input the path of a CSV file containing metadata and uploads them in the database. 
