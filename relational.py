@@ -13,7 +13,7 @@ all = [
 class AnnotationProcessor(Processor):
 import csv
 import sqlite3
-connection = sqlite3.connect("oga.db")
+connection = sqlite3.connect("relational.db")
 cursor = connection.cursor()
 create_table = '''CREATE TABLE annotations(
                 id STRING PRIMARY KEY,
@@ -42,7 +42,7 @@ with open("data/annotations.csv") as file:
 class MetadataProcessor(Processor):
 import csv
 import sqlite3
-connection = sqlite3.connect("makarkina.db")
+connection = sqlite3.connect("relational.db")
 cursor = connection.cursor()
 create_table = '''CREATE TABLE metadata(
                 id STRING PRIMARY KEY,
@@ -66,7 +66,7 @@ with open("data/metadata.csv") as file:
         This method can be called everytime there is a need to upload annotations in the database."""
         pass
 
-
+ 
 class QueryProcessor(Processor):
 
     def getEntityById():
