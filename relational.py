@@ -73,6 +73,7 @@ class QueryProcessor(Processor):
 
     def getEntityById():
         """it returns a data frame with all the entities matching the input identifier (i.e. maximum one entity)."""
+        pass
  
 
 class RelationalQueryProcessor(QueryProcessor):
