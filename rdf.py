@@ -11,6 +11,9 @@ from pymantic import sparql
 class CollectionProcessor(Processor):
 
     def uploadData(self, filename):
+        server = sparql.SPARQLServer(self.dbPathOrUrl)
+        q = "drop graphs"
+        server.update(q)
         # URIRef for classes
         collection = URIRef("http://iiif.io/api/presentation/3#Collection")
         manifest = URIRef("http://iiif.io/api/presentation/3#Manifest")
@@ -20,12 +23,12 @@ class CollectionProcessor(Processor):
 
         my_graph = Graph()
 
-        with open(filename, "r", encoding="utf-8") as user_file:
+        with open(filename, "r") as user_file:
             json_file = json.load(user_file)
 
             for key, value in json_file.items():
 
-                collection_subject = Literal(json_file["id"])
+                collection_subject = URIRef(json_file["id"])
                 print("Subject: ", collection_subject)
 
                 if key == "type" and value == "Collection":
@@ -39,7 +42,7 @@ class CollectionProcessor(Processor):
                     for item in json_file["items"]:
                         print(item["type"])
                         if item["type"] == "Manifest":
-                            manifest_subject = Literal(item["id"])
+                            manifest_subject = URIRef(item["id"])
                             type_triple = (manifest_subject, RDF.type, manifest)
                             my_graph.add(type_triple)
                             label = Literal(item["label"]["none"][0])
@@ -52,7 +55,7 @@ class CollectionProcessor(Processor):
                             for each in item["items"]:
                                 print(each.keys())
                                 if each["type"] == "Canvas":
-                                    canvas_subject = Literal(each["id"])
+                                    canvas_subject = URIRef(each["id"])
                                     type_triple = (canvas_subject, RDF.type, canvas)
                                     my_graph.add(type_triple)
                                     label = Literal(each["label"]["none"][0])
@@ -62,22 +65,20 @@ class CollectionProcessor(Processor):
                                     triple = (manifest_subject, has_item, canvas_subject)
                                     my_graph.add(triple)
            
-            # store = SPARQLUpdateStore()
+            store = SPARQLUpdateStore()
 
-            # store.open((self.dbPathOrUrl, self.dbPathOrUrl))
-            # for triple in my_graph.triples((None, None, None)):
-            #     store.add(triple)
-            #     print("Added triple: ", triple)
-            # store.close()
-            server = sparql.SPARQLServer(self.dbPathOrUrl)
+            store.open((self.dbPathOrUrl, self.dbPathOrUrl))
             for triple in my_graph.triples((None, None, None)):
-                server.update(triple)
+                store.add(triple)
+                print("Added triple: ", triple)
+            store.close()
 
 
-collection_processor = CollectionProcessor("http://172.20.10.2:9999/blazegraph/")
-print(collection_processor.dbPathOrUrl)
-#collection_processor.uploadData('data/collection-1.json')
-collection_processor.uploadData('data/collection-2.json')
+grp_endpoint = "http://127.0.0.1:9999/blazegraph/sparql"
+col_dp = CollectionProcessor()
+col_dp.setDbPathOrUrl(grp_endpoint)
+col_dp.uploadData("data/collection-1.json")
+col_dp.uploadData("data/collection-2.json")
 
 
 class TriplestoreQueryProcessor(Processor):
