@@ -43,7 +43,27 @@ ap.uploadData()
 
 class MetadataProcessor(Processor):
 
-    def uploadData():
+    def uploadData(self):
+        """it takes in input the path of a CSV file containing metadata and uploads them in the database. 
+        This method can be called everytime there is a need to upload metadata in the database."""
+        connection = sqlite3.connect(self.dbPathOrUrl)
+        cursor = connection.cursor()
+        create_table = '''CREATE TABLE metadata(
+                id STRING PRIMARY KEY,
+                title STRING NOT NULL,
+                creator STRING NOT NULL;
+                '''
+        cursor.execute(create_table)
+        with open("data/metadata.csv", "r", encoding="utf-8") as file:
+            contents = csv.reader(file)
+            insert_records = "INSERT INTO metadata (id, title, creator) VALUES(?, ?, ?)"
+            cursor.executemany(insert_records, contents)
+            select_all = "SELECT * FROM metadata"
+            rows = cursor.execute(select_all).fetchall()
+            for r in rows:
+                print(r)
+            connection.commit()
+            connection.close()
         """it takes in input the path of a CSV file containing metadata and uploads them in the database. 
         This method can be called everytime there is a need to upload annotations in the database."""
         pass
@@ -53,7 +73,7 @@ class QueryProcessor(Processor):
 
     def getEntityById():
         """it returns a data frame with all the entities matching the input identifier (i.e. maximum one entity)."""
-
+ 
 
 class RelationalQueryProcessor(QueryProcessor):
 
