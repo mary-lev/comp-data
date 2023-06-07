@@ -64,8 +64,6 @@ class MetadataProcessor(Processor):
                 print(r)
             connection.commit()
             connection.close()
-        """it takes in input the path of a CSV file containing metadata and uploads them in the database. 
-        This method can be called everytime there is a need to upload annotations in the database."""
         pass
 
  
