@@ -3,92 +3,81 @@ from processor import Processor
 from json import load
 import json
 from rdflib import RDF, Literal, URIRef, Graph
-from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
+from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore, SPARQLStore
 from rdflib.namespace import RDFS
-
-
-# URIRef for classes
-Collections = URIRef("http://iiif.io/api/presentation/3#Collection")
-Manifest = URIRef("http://iiif.io/api/presentation/3#Manifest")
-Canvas = URIRef("http://iiif.io/api/presentation/3#Canvas")
-
-# URIRef for Properties
-
-id = URIRef("https://dl.ficlit.unibo.it/iiif/2/19428/manifest")
-# label = URIRef("")
-item = URIRef("http://iiif.io/api/presentation/3#hasItem")
-
-
-my_graph = Graph()
+from pymantic import sparql
 
 
 class CollectionProcessor(Processor):
-    def __init__(self):
-        super().__init__()
 
-    def uploadData(self):
+    def uploadData(self, filename):
+        # URIRef for classes
+        collection = URIRef("http://iiif.io/api/presentation/3#Collection")
+        manifest = URIRef("http://iiif.io/api/presentation/3#Manifest")
+        canvas = URIRef("http://iiif.io/api/presentation/3#Canvas")
 
-        # with open(path, "r", encoding="utf-8") as g:
-        with open('data/collection-2.json') as user_file:
+        has_item = URIRef("http://iiif.io/api/presentation/3#hasItem")
+
+        my_graph = Graph()
+
+        with open(filename, "r", encoding="utf-8") as user_file:
             json_file = json.load(user_file)
 
             for key, value in json_file.items():
-                if key == "id":
-                    subject = URIRef(value)
+
+                collection_subject = Literal(json_file["id"])
+                print("Subject: ", collection_subject)
 
                 if key == "type" and value == "Collection":
-                    object = URIRef(
-                        "http://iiif.io/api/presentation/3#Collection")
-                    triple = (subject, RDF.type, object)
-                    my_graph.add(triple)
+                    type_triple = (collection_subject, RDF.type, collection)
+                    my_graph.add(type_triple)
+                    label = Literal(json_file["label"]["none"][0])
+                    label_triple = (collection_subject, RDFS.label, label)
+                    my_graph.add(label_triple)
 
-                elif key == "type" and value == "Canvas":
-                    object = URIRef("http://iiif.io/api/presentation/3#Canvas")
-                    triple = (subject, RDF.type, object)
-                    my_graph.add(triple)
+                    print("Items: ", len(json_file["items"]))
+                    for item in json_file["items"]:
+                        print(item["type"])
+                        if item["type"] == "Manifest":
+                            manifest_subject = Literal(item["id"])
+                            type_triple = (manifest_subject, RDF.type, manifest)
+                            my_graph.add(type_triple)
+                            label = Literal(item["label"]["none"][0])
+                            print("Manifest label: ", label)
+                            label_triple = (manifest_subject, RDFS.label, label)
+                            my_graph.add(label_triple)
+                            triple = (collection_subject, has_item, manifest_subject)
+                            my_graph.add(triple)
 
-                elif key == "type" and value == "Manifest":
-                    object = URIRef(
-                        "http://iiif.io/api/presentation/3#Manifest")
-                    triple = (subject, RDF.type, object)
-                    my_graph.add(triple)
+                            for each in item["items"]:
+                                print(each.keys())
+                                if each["type"] == "Canvas":
+                                    canvas_subject = Literal(each["id"])
+                                    type_triple = (canvas_subject, RDF.type, canvas)
+                                    my_graph.add(type_triple)
+                                    label = Literal(each["label"]["none"][0])
+                                    print("Label of canvas: ", label)
+                                    label_triple = (canvas_subject, RDFS.label, label)
+                                    my_graph.add(label_triple)
+                                    triple = (manifest_subject, has_item, canvas_subject)
+                                    my_graph.add(triple)
+           
+            # store = SPARQLUpdateStore()
 
-                if key == "label":
-                    for key, value in value.items():
-                        object = Literal(value)
-                        triple = (subject, RDFS.label, object)
-                        my_graph.add(triple)
-
-                if key == "items":
-                    for dict in value:
-                        for inner_key, inner_value in dict.items():
-                            if inner_key == "id":
-                                object = URIRef(inner_value)
-                                triple = (subject, URIRef(
-                                    "http://iiif.io/api/presentation/3#hasItem"), object)
-                                my_graph.add(triple)
-
-
-Collection_Processor = CollectionProcessor()
-
-Collection_Processor.uploadData('data/collection-2.json')
-
-
-# upload data to the endpoint
-
-
-store = SPARQLUpdateStore()
-
-endpoint = "http://172.20.10.2:9999/blazegraph/"
-
-store.open((endpoint, endpoint))
-for triple in my_graph.triples((None, None, None)):
-    store.add(triple)
-
-    # store.close()
+            # store.open((self.dbPathOrUrl, self.dbPathOrUrl))
+            # for triple in my_graph.triples((None, None, None)):
+            #     store.add(triple)
+            #     print("Added triple: ", triple)
+            # store.close()
+            server = sparql.SPARQLServer(self.dbPathOrUrl)
+            for triple in my_graph.triples((None, None, None)):
+                server.update(triple)
 
 
-pass
+collection_processor = CollectionProcessor("http://172.20.10.2:9999/blazegraph/")
+print(collection_processor.dbPathOrUrl)
+#collection_processor.uploadData('data/collection-1.json')
+collection_processor.uploadData('data/collection-2.json')
 
 
 class TriplestoreQueryProcessor(Processor):
