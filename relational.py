@@ -131,7 +131,8 @@ class RelationalQueryProcessor(QueryProcessor):
         with connect("relational.db") as con:
             query = "SELECT * FROM metadata"
             df_sql = read_sql(query, con) 
-        return(df_sql.query(f"creator == '{creator}'"))
+        return(df_sql[df_sql['creator'].str.contains(creator)])
+
 
 
 #это не нужно делать в итоге?
