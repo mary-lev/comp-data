@@ -71,78 +71,71 @@ class QueryProcessor(Processor):
 
     def getEntityById():
         """it returns a data frame with all the entities matching the input identifier (i.e. maximum one entity)."""
-        pass
- 
+        with connect("relational.db") as con:
+            
 
 class RelationalQueryProcessor(QueryProcessor):
-
     def getAllAnnotations():
-        """it returns a data frame containing all the annotations included in the database."""
         with connect("relational.db") as con:
             query = "SELECT * FROM annotations"
             df_sql = read_sql(query, con) 
         print(df_sql)
+        return df_sql
         
-getAllAnnotations()
-
-
 
     def getAllImages():
         """it returns a data frame containing all the images included in the database."""
-        #df_piblications.query ( "type =='immages'" )
-        with connect("relational.db") as con:
-            query = "SELECT motivation FROM annotations"
-            df_sql = read_sql(query, con) 
-        print(df_sql)
-        
-    getAllImages()  
-        
-
-    def getAnnotationsWithBody():
-        """it returns a data frame containing all the annotations included in the database 
-        that have, as annotation body, the entity specified by the input identifier."""
-        # df_piblications.query ( "type =='annotations' and 'body'" )
         with connect("relational.db") as con:
             query = "SELECT body FROM annotations"
             df_sql = read_sql(query, con) 
         print(df_sql)
+        return df_sql
+        
+    
+        
 
-    getAnnotationsWithBody() 
+    def getAnnotationsWithBody(body):
+        """"it returns a data frame containing all the annotations included in the database 
+        that have, as annotation body, the entity specified by the input identifier."""
+        with connect("relational.db") as con:
+            query = "SELECT * FROM annotations"
+            df_sql = read_sql(query, con) 
+            
+        return(df_sql.query(f"body == '{body}'"))
+        
 
-    def getAnnotationsWithBodyAndTarget():
+
+    def getAnnotationsWithBodyAndTarget(body, target):
         """it returns a data frame containing all the annotations included in the database 
         that have, as annotation body and annotation target, the entities specified by the input identifiers."""
         # df_piblications.query ( "type =='annotations', 'body' and 'target'" )
         with connect("relational.db") as con:
-            query = "SELECT body , target FROM annotations"
+            query = "SELECT * FROM annotations"
             df_sql = read_sql(query, con) 
-        print(df_sql)
+        return(df_sql.query(f"body == '{body}' and target == '{target}'"))
         
-    getAnnotationsWithBodyAndTarget()
 
-    def getAnnotationsWithTarget():
+
+    def getAnnotationsWithTarget(target):
         """it returns a data frame containing all the annotations included in the database 
         that have, as annotation target, the entity specified by the input identifier."""
-        #df_piblications.query ( "type =='annotations' and 'target'" )
         with connect("relational.db") as con:
-            query = "SELECT target FROM annotations"
+            query = "SELECT * FROM annotations"
             df_sql = read_sql(query, con) 
-        print(df_sql)
+        return(df_sql.query(f"target == '{target}'"))
+                
 
-    getAnnotationsWithTarget()
-        
-
-    def getEntitiesWithCreator():
+    def getEntitiesWithCreator(creator):
         """it returns a data frame containing all the metadata included in the database 
         related to the entities having the input creator as one of their creators."""
         with connect("relational.db") as con:
-            query = "SELECT creator FROM metadata"
+            query = "SELECT * FROM metadata"
             df_sql = read_sql(query, con) 
-        print(df_sql)
+        return(df_sql.query(f"creator == '{creator}'"))
 
-    getEntitiesWithCreator()
 
-    def getEntitiesWithLabel():
+#это не нужно делать в итоге?
+    def getEntitiesWithLabel(): 
         """it returns a data frame containing all the metadata included in the database 
         related to the entities having, as label, the input label."""
         with connect("relational.db") as con:
@@ -152,12 +145,11 @@ getAllAnnotations()
 
     getEntitiesWithLabel()
 
-    def getEntitiesWithTitle():
+    def getEntitiesWithTitle(title):
         """it returns a data frame containing all the metadata included in the database 
         related to the entities having, as title, the input title."""
         with connect("relational.db") as con:
-            query = "SELECT title FROM metadata"
+            query = "SELECT * FROM metadata"
             df_sql = read_sql(query, con) 
-        print(df_sql)
+        return(df_sql.query(f"title == '{title}'"))
 
-    getEntitiesWithTitle() 
