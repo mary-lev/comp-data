@@ -4,6 +4,9 @@
 import csv
 import sqlite3
 from processor import Processor
+from pandas import read_csv
+from sqlite3 import connect
+from pandas import read_sql
 
 all = [
     "AnnotationProcessor",
@@ -36,9 +39,6 @@ class AnnotationProcessor(Processor):
                 print(r)
             connection.commit()
             connection.close()
-
-ap = AnnotationProcessor(path_url="relational.db")
-ap.uploadData()
 
 
 class MetadataProcessor(Processor):
@@ -78,38 +78,86 @@ class RelationalQueryProcessor(QueryProcessor):
 
     def getAllAnnotations():
         """it returns a data frame containing all the annotations included in the database."""
-        pass
+        with connect("relational.db") as con:
+            query = "SELECT * FROM annotations"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+        
+getAllAnnotations()
+
+
 
     def getAllImages():
         """it returns a data frame containing all the images included in the database."""
-        pass
+        #df_piblications.query ( "type =='immages'" )
+        with connect("relational.db") as con:
+            query = "SELECT motivation FROM annotations"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+        
+    getAllImages()  
+        
 
     def getAnnotationsWithBody():
         """it returns a data frame containing all the annotations included in the database 
         that have, as annotation body, the entity specified by the input identifier."""
-        pass
+        # df_piblications.query ( "type =='annotations' and 'body'" )
+        with connect("relational.db") as con:
+            query = "SELECT body FROM annotations"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+
+    getAnnotationsWithBody() 
 
     def getAnnotationsWithBodyAndTarget():
         """it returns a data frame containing all the annotations included in the database 
         that have, as annotation body and annotation target, the entities specified by the input identifiers."""
-        pass
+        # df_piblications.query ( "type =='annotations', 'body' and 'target'" )
+        with connect("relational.db") as con:
+            query = "SELECT body , target FROM annotations"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+        
+    getAnnotationsWithBodyAndTarget()
 
     def getAnnotationsWithTarget():
         """it returns a data frame containing all the annotations included in the database 
         that have, as annotation target, the entity specified by the input identifier."""
-        pass
+        #df_piblications.query ( "type =='annotations' and 'target'" )
+        with connect("relational.db") as con:
+            query = "SELECT target FROM annotations"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+
+    getAnnotationsWithTarget()
+        
 
     def getEntitiesWithCreator():
         """it returns a data frame containing all the metadata included in the database 
         related to the entities having the input creator as one of their creators."""
-        pass
+        with connect("relational.db") as con:
+            query = "SELECT creator FROM metadata"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+
+    getEntitiesWithCreator()
 
     def getEntitiesWithLabel():
         """it returns a data frame containing all the metadata included in the database 
         related to the entities having, as label, the input label."""
-        pass
+        with connect("relational.db") as con:
+            query = "SELECT id FROM metadata"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+
+    getEntitiesWithLabel()
 
     def getEntitiesWithTitle():
         """it returns a data frame containing all the metadata included in the database 
         related to the entities having, as title, the input title."""
-        pass
+        with connect("relational.db") as con:
+            query = "SELECT title FROM metadata"
+            df_sql = read_sql(query, con) 
+        print(df_sql)
+
+    getEntitiesWithTitle() 
