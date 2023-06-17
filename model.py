@@ -1,4 +1,7 @@
-class Identifiable_entity:
+from typing import List
+
+
+class IdentifiableEntity:
     id: str
 
     def __init__(self, id):
@@ -8,14 +11,14 @@ class Identifiable_entity:
         return self.id
 
 
-class Image(Identifiable_entity):
+class Image(IdentifiableEntity):
     pass 
 
 
-class Annotation(Identifiable_entity):
+class Annotation(IdentifiableEntity):
     motivation: str
     body: Image
-    target: Identifiable_entity
+    target: str
     
     def __init__(self, id, motivation, body, target):
         self.motivation = motivation
@@ -25,16 +28,16 @@ class Annotation(Identifiable_entity):
         super().__init__(id)
 
     def getBody(self):
-        return self.image
+        return self.body
     
     def getMotivation(self):
         return self.motivation
 
     def getTarget (self):
-        return Identifiable_entity
+        return self.target
     
 
-class Entity_with_Metadata(Identifiable_entity):
+class EntityWithMetadata(IdentifiableEntity):
     label: str
     title: str = None
     creators: list = []
@@ -56,37 +59,19 @@ class Entity_with_Metadata(Identifiable_entity):
         return self.creators
     
 
-class Canvas(Entity_with_Metadata):
+class Canvas(EntityWithMetadata):
     pass
 
 
-class Manifest(Entity_with_Metadata):
-    list_of_canvas: list = [Canvas]
+class Manifest(EntityWithMetadata):
+    list_of_canvas: List[Canvas] = []
 
     def getItems(self):
         return self.list_of_canvas
 
 
-class Collection(Entity_with_Metadata):
-    list_of_manifests: list = [Manifest]
+class Collection(EntityWithMetadata):
+    list_of_manifests: List[Manifest] = []
     
     def getItems(self):
         return self.list_of_manifests
-
-
-
-canvas = Canvas("http://example.org/canvas1", "canvas", "Canvas 1", ["John Doe"])
-manifest = Manifest("http://example.org/manifest1", "manifest", "Manifest 1", ["John Doe"])
-
-print(canvas.getId())
-print(manifest.getId())
-
-
-image = Image("http://example.org/image1")
-print(image.getId())
-
-annotation = Annotation("http://example.org/anno1", "painting", image, "http://example.org/canvas1")    
-annotation.body = Image("http://example.org/image1")
-
-print(annotation.getId())
-print(annotation.getMotivation())

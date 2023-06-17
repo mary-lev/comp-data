@@ -1,5 +1,4 @@
 
-
 class Processor():
     """
         The base class for the processors.
@@ -18,3 +17,10 @@ class Processor():
     def setDbPathOrUrl(self, path_url: str):
         """it enables to set a new path or URL for the database to handle."""
         self.dbPathOrUrl = path_url
+
+
+class QueryProcessor(Processor):
+
+    def getEntityById():
+        """it returns a data frame with all the entities matching the input identifier (i.e. maximum one entity)."""
+        pass
