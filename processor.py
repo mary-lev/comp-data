@@ -7,9 +7,6 @@ class Processor():
         """
     dbPathOrUrl = ""
 
-    def __init__(self, path_url: str = ""):
-        self.dbPathOrUrl = path_url
-
     def getDbPathOrUrl(self) -> str: 
         """it returns the path or URL of the database."""
         return self.dbPathOrUrl
@@ -17,6 +14,7 @@ class Processor():
     def setDbPathOrUrl(self, path_url: str):
         """it enables to set a new path or URL for the database to handle."""
         self.dbPathOrUrl = path_url
+        return True
 
 
 class QueryProcessor(Processor):

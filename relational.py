@@ -3,8 +3,8 @@
 
 import csv
 import sqlite3
+import pandas as pd
 from processor import Processor, QueryProcessor
-from pandas import read_csv, read_sql
 
 
 all = [
@@ -69,17 +69,23 @@ class MetadataProcessor(Processor):
 
 class RelationalQueryProcessor(QueryProcessor):
 
+    def getEntityById(self, id: str) -> pd.DataFrame:
+        with sqlite3.connect(self.dbPathOrUrl) as con:
+            query = "SELECT * FROM annotations JOIN metadata ON annotations.id = metadata.id WHERE annotations.id = ?"
+            df_sql = pd.read_sql(query, con, params=(id,))
+        return df_sql.query(f"id == '{id}'")
+
     def getAllAnnotations(self):
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM annotations"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
         return df_sql
 
     def getAllImages(self):
         """it returns a data frame containing all the images included in the database."""
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT body FROM annotations"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
         return df_sql
 
     def getAnnotationsWithBody(self, body):
@@ -87,7 +93,7 @@ class RelationalQueryProcessor(QueryProcessor):
         that have, as annotation body, the entity specified by the input identifier."""
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM annotations"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
             
         return df_sql.query(f"body == '{body}'")
 
@@ -96,7 +102,7 @@ class RelationalQueryProcessor(QueryProcessor):
         that have, as annotation body and annotation target, the entities specified by the input identifiers."""
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM annotations"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
         return df_sql.query(f"body == '{body}' and target == '{target}'")
         
     def getAnnotationsWithTarget(self, target):
@@ -104,7 +110,7 @@ class RelationalQueryProcessor(QueryProcessor):
         that have, as annotation target, the entity specified by the input identifier."""
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM annotations"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
         return df_sql.query(f"target == '{target}'")
 
     def getEntitiesWithCreator(self, creator):
@@ -112,7 +118,7 @@ class RelationalQueryProcessor(QueryProcessor):
         related to the entities having the input creator as one of their creators."""
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM metadata"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
         return df_sql[df_sql['creator'].str.contains(creator)]
 
     def getEntitiesWithTitle(self, title):
@@ -120,6 +126,6 @@ class RelationalQueryProcessor(QueryProcessor):
         related to the entities having, as title, the input title."""
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM metadata"
-            df_sql = read_sql(query, con) 
+            df_sql = pd.read_sql(query, con) 
         return df_sql.query(f"title == '{title}'")
 
