@@ -1,11 +1,10 @@
 import json
 import pandas as pd
-from typing import List
 from rdflib import RDF, Literal, URIRef, Graph
 from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
 from rdflib.namespace import RDFS
 from sparql_dataframe import get as get_sparql
-from pymantic import sparql
+from urllib.error import URLError
 
 from processor import Processor, QueryProcessor
 
@@ -56,8 +55,12 @@ class CollectionProcessor(Processor):
 
             store = SPARQLUpdateStore()
             store.open((self.dbPathOrUrl, self.dbPathOrUrl))
-            for triple in my_graph.triples((None, None, None)):
-                store.add(triple)
+            try:
+                for triple in my_graph.triples((None, None, None)):
+                    store.add(triple)
+            except URLError:
+                print("There is a problem with the connection to the database.")
+                print("Are you sure the database is running?")
             store.close()
         return True
 
