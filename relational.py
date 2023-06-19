@@ -38,7 +38,7 @@ class AnnotationProcessor(Processor):
                 connection.commit()
                 connection.close()
             except sqlite3.IntegrityError:
-                pass
+                print("Error: the database already contains the entity with the same identifier.")
         return True
 
 
@@ -65,7 +65,7 @@ class MetadataProcessor(Processor):
                 connection.commit()
                 connection.close()
             except sqlite3.IntegrityError:
-                pass
+                print("Error: the database already contains the entity with the same identifier.")
         return True
 
 
