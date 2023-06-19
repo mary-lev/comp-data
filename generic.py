@@ -208,7 +208,6 @@ class GenericQueryProcessor(QueryProcessor):
     def getEntitiesWithCreator(self, creator_id: str):
         """it returns a list of objects having class EntityWithMetadata, included in the databases accessible
         via the query processors, related to the entities having the input creator as one of their creators."""
-        print("PRCOESSORS: ", self.queryProcessors)
         for qp in self.queryProcessors:
             if "getEntitiesWithCreator" in dir(qp):
                 entities = qp.getEntitiesWithCreator(creator_id)
