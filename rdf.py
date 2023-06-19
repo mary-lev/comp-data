@@ -86,7 +86,6 @@ class TriplestoreQueryProcessor(QueryProcessor):
                 ?manifest rdfs:label ?title .
             }
         """
-        #return self.make_query(query, columns=['id', "label", "title"])
         df_sparql = get_sparql(self.dbPathOrUrl, query, True)
         return df_sparql
 
