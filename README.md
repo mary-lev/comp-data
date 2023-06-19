@@ -4,4 +4,3 @@
 
 [Initial task at the repository](https://github.com/comp-data/2022-2023/tree/main/docs/project)
 
-alkyret 

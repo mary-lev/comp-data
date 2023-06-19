@@ -1,13 +1,12 @@
-
 class Processor():
     """
         The base class for the processors.
-        The variable path_url containing the path or the URL of the database, 
+        The variable path_url containing the path or the URL of the database,
         initially set as an empty string, that will be updated with the method setDbPathOrUrl.
         """
     dbPathOrUrl = ""
 
-    def getDbPathOrUrl(self) -> str: 
+    def getDbPathOrUrl(self) -> str:
         """it returns the path or URL of the database."""
         return self.dbPathOrUrl
 
