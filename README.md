@@ -4,3 +4,8 @@
 
 [Initial task at the repository](https://github.com/comp-data/2022-2023/tree/main/docs/project)
 
+Our team:
+- Alka Rana
+- Olga Makarkina
+- Marco Lamorte
+- Maria Levchenko
