@@ -276,4 +276,3 @@ class GenericQueryProcessor(QueryProcessor):
             title=relational_qp.getEntityById(manifest["id"]).loc[0, "title"],
             creators=relational_qp.getEntityById(manifest["id"]).loc[0, "creator"],
         ) for _, manifest in manifests.iterrows()]
-
