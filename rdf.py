@@ -81,7 +81,7 @@ class TriplestoreQueryProcessor(QueryProcessor):
     def getAllCanvases(self):
         """it returns a data frame containing all the canvases included in the database."""
 
-        query = self.prefix_sc  + """select ?id ?label ?title where
+        query = self.prefix_sc + """select ?id ?label ?title where
             {
                 ?manifest sc:hasItem ?id .
                 ?id rdfs:label ?label .
