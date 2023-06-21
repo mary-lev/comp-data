@@ -39,8 +39,8 @@ class GenericQueryProcessor(QueryProcessor):
             return [Annotation(
                 id=annotation["id"],
                 motivation=annotation["motivation"],
-                body=annotation["body"],
-                target=annotation["target"],
+                body=Image(id=annotation["body"]),
+                target=IdentifiableEntity(id=annotation["target"]),
             ) for _, annotation in annotations.iterrows()]
         return []
 
@@ -55,21 +55,6 @@ class GenericQueryProcessor(QueryProcessor):
                     label=canvas.get("label"),
                     title=canvas.get("title"),
                 ) for _, canvas in canvases.iterrows()]
-
-    def getAllCollections(self):
-        """it returns a list of objects having class Collection included in the databases accessible via the query processors."""
-        collections = pd.DataFrame()
-        for qp in self.queryProcessors:
-            if "getAllCollections" in dir(qp):
-                collections = qp.getAllCollections()
-            else:
-                relational_qp = qp
-        return [Collection(
-            id=collection["id"],
-            label=collection.get("label"),
-            title=collection.get("title"),
-            creators=relational_qp.getEntityById(collection["id"]).to_dict().get("creator", {}).get(0, []),
-        ) for _, collection in collections.iterrows()]
 
     def getAllImages(self):
         """it returns a list of objects having class Image included in the databases accessible via the query processors."""
@@ -92,6 +77,7 @@ class GenericQueryProcessor(QueryProcessor):
             label=manifest.get("label"),
             title=relational.getEntityById(manifest["id"]).loc[0, "title"],
             creators=relational.getEntityById(manifest["id"]).loc[0, "creator"],
+            list_of_canvas=self.getCanvasesInManifest(manifest["id"]),
         ) for _, manifest in manifests.iterrows()]
 
     def getAnnotationsToCanvas(self, canvas_id: str):
@@ -103,8 +89,8 @@ class GenericQueryProcessor(QueryProcessor):
                 return [Annotation(
                     id=annotation["id"],
                     motivation=annotation["motivation"],
-                    body=annotation["body"],
-                    target=annotation["target"],
+                    body=Image(id=annotation["body"]),
+                    target=IdentifiableEntity(id=annotation["target"]),
                 ) for _, annotation in annotation.iterrows()]
 
     def getAnnotationsToCollection(self, collection_id: str):
@@ -119,8 +105,8 @@ class GenericQueryProcessor(QueryProcessor):
         return [Annotation(
             id=annotation["id"],
             motivation=annotation["motivation"],
-            body=annotation["body"],
-            target=annotation["target"],
+            body=Image(id=annotation["body"]),
+            target=IdentifiableEntity(id=annotation["target"]),
         ) for _, annotation in annotation_data.iterrows()]
 
     def getAnnotationsToManifest(self, manifest_id: str):
@@ -134,8 +120,8 @@ class GenericQueryProcessor(QueryProcessor):
         return [Annotation(
             id=annotation["id"],
             motivation=annotation["motivation"],
-            body=annotation["body"],
-            target=annotation["target"],
+            body=Image(id=annotation["body"]),
+            target=IdentifiableEntity(id=annotation["target"]),
         ) for _, annotation in manifest_data.iterrows()]
 
     def getAnnotationsWithBody(self, id: str):
@@ -147,8 +133,8 @@ class GenericQueryProcessor(QueryProcessor):
                 return [Annotation(
                     id=annotation["id"],
                     motivation=annotation["motivation"],
-                    body=annotation["body"],
-                    target=annotation["target"],
+                    body=Image(id=annotation["body"]),
+                    target=IdentifiableEntity(id=annotation["target"]),
                 ) for _, annotation in annotation.iterrows()]
         return None
 
@@ -161,8 +147,8 @@ class GenericQueryProcessor(QueryProcessor):
                 return [Annotation(
                     id=annotation["id"],
                     motivation=annotation["motivation"],
-                    body=annotation["body"],
-                    target=annotation["target"],
+                    body=Image(id=annotation["body"]),
+                    target=IdentifiableEntity(id=annotation["target"]),
                 ) for _, annotation in annotation.iterrows()]
         return None
 
@@ -175,8 +161,8 @@ class GenericQueryProcessor(QueryProcessor):
                 return [Annotation(
                     id=annotation["id"],
                     motivation=annotation["motivation"],
-                    body=annotation["body"],
-                    target=annotation["target"],
+                    body=Image(id=annotation["body"]),
+                    target=IdentifiableEntity(id=annotation["target"]),
                 ) for _, annotation in annotation.iterrows()]
         return None
 
@@ -274,4 +260,21 @@ class GenericQueryProcessor(QueryProcessor):
             label=manifest.get("label"),
             title=relational_qp.getEntityById(manifest["id"]).loc[0, "title"],
             creators=relational_qp.getEntityById(manifest["id"]).loc[0, "creator"],
+            list_of_canvas=self.getCanvasesInManifest(manifest["id"]),
         ) for _, manifest in manifests.iterrows()]
+
+    def getAllCollections(self):
+        """it returns a list of objects having class Collection included in the databases accessible via the query processors."""
+        collections = pd.DataFrame()
+        for qp in self.queryProcessors:
+            if "getAllCollections" in dir(qp):
+                collections = qp.getAllCollections()
+            else:
+                relational_qp = qp
+        return [Collection(
+            id=collection["id"],
+            label=collection.get("label"),
+            title=collection.get("title"),
+            creators=relational_qp.getEntityById(collection["id"]).to_dict().get("creator", {}).get(0, []),
+            list_of_manifests=self.getManifestsInCollection(collection["id"]),
+        ) for _, collection in collections.iterrows()]

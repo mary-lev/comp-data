@@ -71,12 +71,25 @@ class Canvas(EntityWithMetadata):
 class Manifest(EntityWithMetadata):
     list_of_canvas: List[Canvas] = []
 
+    def __init__(self, id, label, title=None, creators=None, list_of_canvas=None):
+        if isinstance(list_of_canvas, list):
+            self.list_of_canvas = list_of_canvas
+        else:
+            self.list_of_canvas = []
+
+        super().__init__(id, label, title, creators)
+
     def getItems(self):
         return self.list_of_canvas
 
 
 class Collection(EntityWithMetadata):
     list_of_manifests: List[Manifest] = []
+
+    def __init__(self, id, label, title=None, creators=None, list_of_manifests=None):
+        if isinstance(list_of_manifests, list):
+            self.list_of_manifests = list_of_manifests
+        super().__init__(id, label, title, creators)
 
     def getItems(self):
         return self.list_of_manifests
