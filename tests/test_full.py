@@ -59,7 +59,9 @@ class TestProjectBasic(unittest.TestCase):
         self.assertTrue(rel_qp.setDbPathOrUrl(self.relational))
 
         self.assertIsInstance(rel_qp.getEntityById("just_a_test"), DataFrame)
-        self.assertEqual(rel_qp.getEntityById("just_a_test").shape, (0, 3))
+        self.assertEqual(rel_qp.getEntityById("just_a_test").shape, (0, 4))
+        self.assertIsInstance(rel_qp.getEntityById("https://dl.ficlit.unibo.it/iiif/2/28429/annotation/p0001-image"), DataFrame)
+        self.assertIsInstance(rel_qp.getEntityById("https://dl.ficlit.unibo.it/iiif/28429/collection"), DataFrame)
 
         self.assertIsInstance(rel_qp.getAllAnnotations(), DataFrame)
         self.assertIsInstance(rel_qp.getAllAnnotations().columns.to_list(), List)
@@ -100,6 +102,10 @@ class TestProjectBasic(unittest.TestCase):
     def test_05_TriplestoreQueryProcessor(self):
         grp_qp = TriplestoreQueryProcessor()
         self.assertTrue(grp_qp.setDbPathOrUrl(self.graph))
+
+        self.assertIsInstance(grp_qp.getEntityById("just_a_test"), DataFrame)
+        self.assertIsInstance(grp_qp.getEntityById("https://dl.ficlit.unibo.it/iiif/28429/collection"), DataFrame)
+        self.assertIsInstance(grp_qp.getEntityById("https://dl.ficlit.unibo.it/iiif/2/28429/canvas/p1"), DataFrame)
 
         all_canvases = grp_qp.getAllCanvases()
         self.assertIsInstance(all_canvases, DataFrame)
@@ -155,6 +161,11 @@ class TestProjectBasic(unittest.TestCase):
         self.assertEqual(len(generic.queryProcessors), 2)
         self.assertIsInstance(generic.queryProcessors[0], RelationalQueryProcessor)
         self.assertIsInstance(generic.queryProcessors[1], TriplestoreQueryProcessor)
+
+        self.assertEqual(generic.getEntityById("just_a_test"), None)
+        self.assertIsInstance(generic.getEntityById("https://dl.ficlit.unibo.it/iiif/2/28429/canvas/p1"), Canvas)
+        self.assertIsInstance(generic.getEntityById("https://dl.ficlit.unibo.it/iiif/2/28429/manifest"), Manifest)
+        self.assertIsInstance(generic.getEntityById("https://dl.ficlit.unibo.it/iiif/28429/collection"), Collection)
         
         self.assertIsInstance(generic.getAllAnnotations(), list)
         ann_1 = generic.getAllAnnotations()
@@ -284,7 +295,7 @@ class TestProjectBasic(unittest.TestCase):
         ent_1 = generic.getEntitiesWithCreator("Alighieri, Dante")
         self.assertIsInstance(ent_1, list)
         for a in ent_1:
-            self.assertIsInstance(a, EntityWithMetadata)
+            self.assertIsInstance(a, Manifest)
             self.assertIsInstance(a.id, str)
             self.assertIsInstance(a.label, str)
             self.assertIsInstance(a.creators, list)
@@ -293,7 +304,7 @@ class TestProjectBasic(unittest.TestCase):
         ent_2 = generic.getEntitiesWithLabel("Il Canzoniere")
         self.assertIsInstance(ent_2, list)
         for a in ent_2:
-            self.assertIsInstance(a, EntityWithMetadata)
+            self.assertIsInstance(a, Manifest)
             self.assertIsInstance(a.id, str)
             self.assertIsInstance(a.label, str)
 
@@ -301,7 +312,7 @@ class TestProjectBasic(unittest.TestCase):
         ent_3 = generic.getEntitiesWithTitle("Dante Alighieri: Opere")
         self.assertIsInstance(ent_3, list)
         for a in ent_3:
-            self.assertIsInstance(a, EntityWithMetadata)
+            self.assertIsInstance(a, Collection)
             self.assertIsInstance(a.id, str)
             self.assertIsInstance(a.label, str)
 

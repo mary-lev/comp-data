@@ -74,7 +74,12 @@ class RelationalQueryProcessor(QueryProcessor):
     def getEntityById(self, id: str) -> pd.DataFrame:
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM metadata WHERE id = ?"
-            return pd.read_sql(query, con, params=(id,))
+            result = pd.read_sql(query, con, params=(id,))
+            if not result.empty:
+                return result
+            query = "SELECT * FROM annotations WHERE id = ?"
+            result = pd.read_sql(query, con, params=(id,))
+            return result
 
     def getAllAnnotations(self):
         with sqlite3.connect(self.dbPathOrUrl) as con:

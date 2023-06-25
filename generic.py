@@ -1,6 +1,7 @@
 from typing import List
 import pandas as pd
 from processor import QueryProcessor
+from rdf import match_types
 from model import Annotation, Canvas, Collection, Image, Manifest, IdentifiableEntity, EntityWithMetadata
 
 
@@ -20,14 +21,36 @@ class GenericQueryProcessor(QueryProcessor):
         self.queryProcessors.append(qp)
         return True
 
+    def convert_row_to_model(self, row: pd.Series):
+        """It converts the input row into an object having the class model."""
+        model = [value["model"] for _, value in match_types.items() if value["uriref"] == row["type"]][0]
+        return model(
+            id=row["id"],
+            label=row.get("label"),
+            title=row.get("title"),
+            creators=row.get("creator"),
+        )
+
+    def convert_dataframe_to_list(self, dataframe: pd.DataFrame):
+        """It converts the input dataframe into a list of objects having the class model."""
+        return [self.convert_row_to_model(row) for _, row in dataframe.iterrows()]
+
     def getEntityById(self, id: str):
+        entity = pd.DataFrame(columns=["id"])
         for query_processor in self.queryProcessors:
-            if "getEntityById" in dir(query_processor):
-                data = query_processor.getEntityById(id)
-                if not data.empty:
-                    return IdentifiableEntity(
-                        id=data.to_dict("records")[0]["id"],
-                    )
+            data = query_processor.getEntityById(id)
+            if not data.empty:
+                entity = pd.merge(entity, data, on='id', how='outer')
+        if "type" in entity.columns:
+            return self.convert_dataframe_to_list(entity)[0]
+        elif "motivation" in entity.columns:
+            return Annotation(
+                id=entity["id"],
+                motivation=entity["motivation"],
+                body=Image(id=entity["body"]),
+                target=IdentifiableEntity(id=entity["target"]),
+            )
+
         return None
 
     def getAllAnnotations(self):
@@ -194,49 +217,47 @@ class GenericQueryProcessor(QueryProcessor):
     def getEntitiesWithCreator(self, creator_id: str):
         """it returns a list of objects having class EntityWithMetadata, included in the databases accessible
         via the query processors, related to the entities having the input creator as one of their creators."""
+        entities = pd.DataFrame()
         for qp in self.queryProcessors:
             if "getEntitiesWithCreator" in dir(qp):
                 entities = qp.getEntitiesWithCreator(creator_id)
             else:
                 triple_qp = qp
-        return [EntityWithMetadata(
-            id=entity.get("id"),
-            label=triple_qp.getEntityById(entity.get("id")).loc[0, "label"],
-            title=entity.get("title"),
-            creators=entity.get("creator")
-        ) for _, entity in entities.iterrows()]
+        if not entities.empty:
+            entities["label"] = entities["id"].apply(lambda x: triple_qp.getEntityById(x).loc[0, "label"])
+            entities["type"] = entities["id"].apply(lambda x: triple_qp.getEntityById(x).loc[0, "type"])
+            return self.convert_dataframe_to_list(entities)
+        return []
 
     def getEntitiesWithLabel(self, label: str):
         """it returns a list of objects having class EntityWithMetadata, included in the databases accessible
         via the query processors, related to the entities having, as label, the input label."""
+        entities = pd.DataFrame()
         for qp in self.queryProcessors:
             if "getEntitiesWithLabel" in dir(qp):
                 entities = qp.getEntitiesWithLabel(label)
             else:
                 relational_qp = qp
-
-        return [EntityWithMetadata(
-            id=entity["id"],
-            label=entity["label"],
-            title=relational_qp.getEntityById(entity["id"]).loc[0, "title"],
-            creators=relational_qp.getEntityById(entity.get("id")).loc[0, "creator"],
-        ) for _, entity in entities.iterrows()]
+        if not entities.empty:
+            entities["title"] = entities["id"].apply(lambda x: relational_qp.getEntityById(x).loc[0, "title"])
+            entities["creator"] = entities["id"].apply(lambda x: relational_qp.getEntityById(x).loc[0, "creator"])
+            return self.convert_dataframe_to_list(entities)
+        return []
 
     def getEntitiesWithTitle(self, title: str) -> List[EntityWithMetadata]:
         """it returns a list of objects having class EntityWithMetadata, included in the databases accessible
         via the query processors, related to the entities having, as title, the input title."""
+        entities = pd.DataFrame()
         for qp in self.queryProcessors:
             if "getEntitiesWithTitle" in dir(qp):
                 entities = qp.getEntitiesWithTitle(title)
             else:
                 triple_qp = qp
-
-        return [EntityWithMetadata(
-            id=entity["id"],
-            label=triple_qp.getEntityById(entity["id"]).loc[0, "label"],
-            title=entity["title"],
-            creators=entity["creator"],
-        ) for _, entity in entities.iterrows()]
+        if not entities.empty:
+            entities["label"] = entities["id"].apply(lambda x: triple_qp.getEntityById(x).loc[0, "label"])
+            entities["type"] = entities["id"].apply(lambda x: triple_qp.getEntityById(x).loc[0, "type"])
+            return self.convert_dataframe_to_list(entities)
+        return []
 
     def getImagesAnnotatingCanvas(self, canvas_id: str):
         """it returns a list of objects having class Image, included in the databases accessible

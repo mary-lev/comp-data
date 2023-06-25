@@ -7,14 +7,22 @@ from sparql_dataframe import get as get_sparql
 from urllib.error import URLError
 
 from processor import Processor, QueryProcessor
+from model import Collection, Manifest, Canvas
+
+
+match_types = {
+    "Collection": {"uriref": "http://iiif.io/api/presentation/3#Collection", "model": Collection},
+    "Manifest": {"uriref": "http://iiif.io/api/presentation/3#Manifest", "model": Manifest},
+    "Canvas": {"uriref": "http://iiif.io/api/presentation/3#Canvas", "model": Canvas}
+}
 
 
 class CollectionProcessor(Processor):
 
     def uploadData(self, filename: str) -> bool:
-        collection = URIRef("http://iiif.io/api/presentation/3#Collection")
-        manifest = URIRef("http://iiif.io/api/presentation/3#Manifest")
-        canvas = URIRef("http://iiif.io/api/presentation/3#Canvas")
+        collection = URIRef(match_types["Collection"]["uriref"])
+        manifest = URIRef(match_types["Manifest"]["uriref"])
+        canvas = URIRef(match_types["Canvas"]["uriref"])
         has_item = URIRef("http://iiif.io/api/presentation/3#hasItem")
 
         my_graph = Graph()
