@@ -72,6 +72,8 @@ class MetadataProcessor(Processor):
 class RelationalQueryProcessor(QueryProcessor):
 
     def getEntityById(self, id: str) -> pd.DataFrame:
+        if not isinstance(id, str):
+            return None
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM metadata WHERE id = ?"
             result = pd.read_sql(query, con, params=(id,))
@@ -125,7 +127,6 @@ class RelationalQueryProcessor(QueryProcessor):
         with sqlite3.connect(self.dbPathOrUrl) as con:
             query = "SELECT * FROM metadata"
             df_sql = pd.read_sql(query, con)
-        print("With creator: ", df_sql[df_sql['creator'].str.contains(creator)])
         return df_sql[df_sql['creator'].str.contains(creator)]
 
     def getEntitiesWithTitle(self, title):

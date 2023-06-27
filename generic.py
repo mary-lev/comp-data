@@ -39,16 +39,19 @@ class GenericQueryProcessor(QueryProcessor):
         entity = pd.DataFrame(columns=["id"])
         for query_processor in self.queryProcessors:
             data = query_processor.getEntityById(id)
-            if not data.empty:
+            if data is not None and not data.empty:
                 entity = pd.merge(entity, data, on='id', how='outer')
+        if entity.empty:
+            return None
         if "type" in entity.columns:
             return self.convert_dataframe_to_list(entity)[0]
         elif "motivation" in entity.columns:
+            entity = entity.to_dict()
             return Annotation(
-                id=entity["id"],
-                motivation=entity["motivation"],
-                body=Image(id=entity["body"]),
-                target=IdentifiableEntity(id=entity["target"]),
+                id=entity.get("id", {}).get(0),
+                motivation=entity.get("motivation", {}).get(0),
+                body=Image(id=entity.get("body", {}).get(0)),
+                target=IdentifiableEntity(id=entity.get("target", {}).get(0)),
             )
 
         return None
